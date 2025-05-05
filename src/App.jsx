@@ -4,7 +4,8 @@ import ChtbotIcon from './components/ChatbotIcon';
 import ChatForm from './components/ChatForm';
 import ChatMessage from './components/ChatMessage';
 import { companyInfo } from './util/companyInfo';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+// import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
 function App() {
   const [chatHistory, setChatHistory] = useState([
@@ -51,16 +52,26 @@ function App() {
       // //  Clean and update chat history with bot's response
       // updateHistory(apiResponseText);
 
-      const getAI = new GoogleGenerativeAI('AIzaSyDA6RxdsIFB_3-Zsn6Tmz9gHhdcw1Gh-Kg');
-      const model = getAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-      const data = await model.generateContent(JSON.stringify({ contents: history }));
-      const apiResponseText = data.response.candidates[0].content.parts[0].text
-        .replace(/\*\*(.*?)\*\*/g, '$1')
-        .trim();
+      const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+      const getAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+      const response = await getAI.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: history,
+      });
+      const apiResponseText = response.text.replace(/\*\*(.*?)\*\*/g, '$1').trim();
       // Clean and update chat history with bot's response
       updateHistory(apiResponseText);
+      console.log('response data: ', response);
 
-      console.log('response data: ', apiResponseText);
+      // const getAI = new GoogleGenerativeAI('AIzaSyDA6RxdsIFB_3-Zsn6Tmz9gHhdcw1Gh-Kg');
+      // const model = getAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      // const data = await model.generateContent({ contents: history });
+      // const apiResponseText = data.response.candidates[0].content.parts[0].text
+      //   .replace(/\*\*(.*?)\*\*/g, '$1')
+      //   .trim();
+      // Clean and update chat history with bot's response
+      // updateHistory(apiResponseText);
+      // console.log('response data: ', data);
     } catch (error) {
       updateHistory(error.message, true);
 
